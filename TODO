@@ -1,0 +1,2 @@
+* Generation target directory should be made maintainer can change. currently, target directory is locale/ which is hardcoded.
+* It's better to consiter user-defined file deploy list, If documentation maintainer wants to maintain each language's documentation separately.
