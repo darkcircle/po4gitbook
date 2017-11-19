@@ -78,12 +78,26 @@ class PFMMain:
 
             # print('%d: %s' % (line, mdstr), end="", flush=True)
             mdptype = self.mdparser.parse(mdstr)
-            if mdptype == 'blank':
-                continue
 
             mdp = MdPara()
             mdp.set_type(mdptype, mdstr)
             cline = line
+
+            # paragraph of text that's broken into multiple lines
+            if mdp.is_common():
+                while 1:
+                    mdstr = mdfile.readline()
+                    line += 1
+                    if not mdstr or self.mdparser.parse(mdstr) == 'blank':
+                        break
+                    if self.mdparser.parse(mdstr) == 'swclabel':
+                        line -= 1
+                        mdfile.seek(mdpos)
+                        break
+
+                    # print('%d: %s' % (line, mdstr), end="", flush=True)
+                    mdp.set_type(mdp.para_type(), mdp.para_msg() + mdstr)
+                    mdpos = mdfile.tell()
 
             # if Front matter yaml section starts # TODO join with codeblock?
             if mdp.is_yamlblock():
