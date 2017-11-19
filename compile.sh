@@ -1,2 +1,3 @@
 #!/bin/sh
-/usr/bin/python3 tools/poc.py 
+dirpo4md=$(dirname "$0")
+/usr/bin/python3 ${dirpo4md}/tools/poc.py
