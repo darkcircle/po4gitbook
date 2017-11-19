@@ -83,6 +83,19 @@ class PFMMain:
             mdp.set_type(mdptype, mdstr)
             cline = line
 
+            # if Front matter yaml section starts # TODO join with codeblock?
+            if mdp.is_yamlblock():
+                while 1:
+                    mdstr = mdfile.readline()
+                    line += 1
+                    if not mdstr:
+                        break
+                    # print('%d: %s' % (line, mdstr), end="", flush=True)
+                    mdp.set_type(mdp.para_type(), mdp.para_msg() + mdstr)
+
+                    if self.mdparser.parse(mdstr) == 'yamlblock':
+                        break
+
             # if paragraph is common and is expectable to be a header
             # by looking forward the next line
             if mdp.is_headerline():

@@ -27,6 +27,9 @@ class MdPara:
     def para_msg(self):
         return self.paramsg
 
+    def is_yamlblock(self):
+        return self.check_type('yamlblock')
+
     def is_header(self):
         return self.check_type('header')
 

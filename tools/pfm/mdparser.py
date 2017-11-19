@@ -5,6 +5,7 @@ import re
 
 class MdParser:
     def __init__(self):
+        self.yaml = re.compile(r'(-){3}')
         self.hc = re.compile(r'(^[\s\S]+\n(-[-]+|=[=]+)|' +
                              r'^([#]{1,6})\s[\s\S]+(\s\3)?)')
         self.hlc = re.compile(r'^(-[-]+|=[=]+)\n?$')
@@ -21,7 +22,10 @@ class MdParser:
 
 
     def parse(self, mstr):
-        if self.bqc.match(mstr):
+        if self.yaml.match(mstr):
+            return 'yamlblock'
+
+        elif self.bqc.match(mstr):
             return 'blockquote'
 
         elif self.ulc.match(mstr):

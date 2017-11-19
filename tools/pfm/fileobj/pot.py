@@ -171,6 +171,9 @@ class PoTemplate:
                 elif pobj.is_codeblock():
                     self.fo.write('# code block\n')
 
+                elif pobj.is_yamlblock():
+                    self.fo.write('# Front Matter\n')
+
                 elif pobj.is_tagopen():
                     self.fo.write('# inline html\n')
 
