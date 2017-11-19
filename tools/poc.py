@@ -6,6 +6,7 @@ import glob
 import os
 import re
 from datetime import datetime
+import unicodedata as ud
 
 from dateutil.tz import tzlocal
 from pfm.fileobj.mdfile import MdFile
@@ -51,8 +52,8 @@ class LangTeamMissingException(Exception):
 
 class PoCompiler:
     def __init__(self):
-        self.sourcedir = '{}/po'.format(os.getcwd())
-        self.outputdir = '{}/locale'.format(os.getcwd())
+        self.sourcedir = os.path.join(os.getcwd(), 'po')
+        self.outputdir = os.path.join(os.getcwd(), 'locale')
         self.outfile = None
 
         self.last_trans_name = []
@@ -65,7 +66,7 @@ class PoCompiler:
         self.poparser = PoParser()
         self.crpt = r'^# This file is distributed under the same license as ' \
                     r'the [a-zA-Z0-9\-\.\_]+ package\.\n?$'
-        self.creditpt = '^#\s([A-Z][a-z\W]+)([\-\s][A-Z][a-z\W]+)+' \
+        self.creditpt = '^#\s([\wA-Z][\wa-z\W]+)([\-\s][\wA-Z][\wa-z\W]+)+' \
                         '\s\<[a-zA-Z0-9\.\-_]+\@'\
                         '[a-zA-Z0-9\-_]+(\.[a-zA-Z0-9\-_]+)+\>' \
                         '(,\s([1-2][0-9]{3})(\-([1-2][0-9]{3}))?)+\.\n?$'
@@ -89,7 +90,9 @@ class PoCompiler:
         exist_credit = False
 
         while 1:
-            poline = self.f.readline()[:-1]
+            # How to include names with strange characters
+            # https://stackoverflow.com/questions/18663644/how-to-account-for-accent-characters-for-regex-in-python
+            poline = ud.normalize('NFC', self.f.readline()[:-1])
             pt = self.poparser.parse(poline)
 
             # end of verification
@@ -236,14 +239,14 @@ class PoCompiler:
         mdlist = self.pofile.msg_object()
         for mdfn in sorted(mdlist.keys()):
             mdfo = mdlist.get(mdfn)
-            tpath = '{}/{}/{}'.format(self.outputdir, self.clocale,
-                                      mdfn.split('/')[0])
+            tpath = os.path.join(self.outputdir, self.clocale,
+                                      mdfn.split(os.sep)[0])
             if not os.path.exists(tpath) and '/' in mdfn:
                 os.makedirs(tpath, 0o755)
 
             # writeout to md
-            self.outfile = open(
-                '{}/{}/{}'.format(self.outputdir, self.clocale, mdfn), 'w')
+            self.outfile = open(os.path.join(
+                self.outputdir, self.clocale, mdfn), 'w')
             print('Writing {} ... '.format(self.outfile.name), end='')
 
             # cln : current line number
@@ -268,18 +271,15 @@ class PoCompiler:
                         lndf -= 1
 
                 pomobj = pomarr.get(poln)
+                lim = pomobj.msgid().count('\\n') - pomobj.msgid().count('\\\\n')
                 if len(pomobj.msgstr()) == 0:
-                    lim = pomobj.msgid().count('\\n')
-                    self.outfile.write(
-                        pomobj.msgid()
-                              .replace('\\n', '\n')
-                              .replace('\\"', '\"')
-                              .replace('\\\\', '\\'))
+                    msg_to_file = pomobj.msgid()
                 else:
-                    lim = pomobj.msgstr().count('\\n')
-                    self.outfile.write(
-                        pomobj.msgstr()
+                    msg_to_file = pomobj.msgstr()
+                self.outfile.write(
+                    msg_to_file
                               .replace('\\n', '\n')
+                              .replace('\\\n', '\\n') # in case there's a directory as c:\Documents\nelle
                               .replace('\\"', '\"')
                               .replace('\\\\', '\\'))
 
@@ -290,11 +290,11 @@ class PoCompiler:
             print('OK')
 
     def run(self):
-        cll = open('{}/LINGUAS'.format(self.sourcedir), 'r').readline()
+        cll = open(os.path.join(self.sourcedir, 'LINGUAS'), 'r').readline()
         self.langlist = cll[:-1].split(' ')
 
         for lang in self.langlist:
-            polist = glob.glob('{}/*.{}.po'.format(self.sourcedir, lang))
+            polist = glob.glob(os.path.join(self.sourcedir, '*.{}.po'.format(lang)))
             if len(polist) != 0:
                 print('Compiling *.{}.po ...'.format(lang))
             self.clocale = lang

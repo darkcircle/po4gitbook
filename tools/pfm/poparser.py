@@ -5,7 +5,7 @@ import re
 
 class PoParser:
     def __init__(self):
-        self.dsc = re.compile(r'^#\s[a-zA-Z0-9\-\._<>@,\s]*$')
+        self.dsc = re.compile(r'^#\s[\wa-zA-Z0-9\-\._<>@,\s]*$')
         self.phc = re.compile(
             r'^\"([A-Z][A-Za-z0-9]+)(\-[A-Z][A-Za-z0-9]+)+' +
             r':\s[a-zA-Z0-9@<>:;=/\.\-\+\s]+\\n\"')

@@ -1,3 +1,4 @@
 #!/bin/sh
-/usr/bin/python3 tools/createpot.py
-/usr/bin/python3 tools/updatepo.py
+dirpo4md=$(dirname "$0")
+/usr/bin/python3 ${dirpo4md}/tools/createpot.py
+/usr/bin/python3 ${dirpo4md}/tools/updatepo.py

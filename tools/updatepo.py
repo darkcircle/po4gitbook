@@ -8,9 +8,9 @@ import os
 
 class UpdatePo:
     def __init__(self):
-        self.popath = '{}/po'.format(os.getcwd())
+        self.popath = os.path.join(os.getcwd(), 'po')
         self.cmd_prefix = 'msgmerge -vU '
-        self.cmd_pstfix = ' > /dev/null'
+        self.cmd_pstfix = ' > /dev/null' #FIXME: to use os.devnull?
         
         self.potlist = []
         self.polist = []
@@ -20,11 +20,12 @@ class UpdatePo:
         return '{} {} {}'.format(self.cmd_prefix, argv, self.cmd_pstfix)
 
     def run(self):
-        self.potlist = glob.glob('{}/*.pot'.format(self.popath))
+        self.potlist = glob.glob(os.path.join(self.popath, '*.pot'))
 
         for pot in self.potlist:
-            fn = pot.split('/')[-1].split('.')[0]
-            self.polist = glob.glob('{}/{}.*.po'.format(self.popath, fn))
+            fn = os.path.split(pot)[-1].split('.')[0]
+            fn += '.*.po'
+            self.polist = glob.glob(os.path.join(self.popath, fn))
 
             for po in self.polist:
                 print('Updating {} ...'.format(po))
