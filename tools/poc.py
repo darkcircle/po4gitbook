@@ -271,18 +271,15 @@ class PoCompiler:
                         lndf -= 1
 
                 pomobj = pomarr.get(poln)
+                lim = pomobj.msgid().count('\\n') - pomobj.msgid().count('\\\\n')
                 if len(pomobj.msgstr()) == 0:
-                    lim = pomobj.msgid().count('\\n')
-                    self.outfile.write(
-                        pomobj.msgid()
-                              .replace('\\n', '\n')
-                              .replace('\\"', '\"')
-                              .replace('\\\\', '\\'))
+                    msg_to_file = pomobj.msgid()
                 else:
-                    lim = pomobj.msgstr().count('\\n')
-                    self.outfile.write(
-                        pomobj.msgstr()
+                    msg_to_file = pomobj.msgstr()
+                self.outfile.write(
+                    msg_to_file
                               .replace('\\n', '\n')
+                              .replace('\\\n', '\\n') # in case there's a directory as c:\Documents\nelle
                               .replace('\\"', '\"')
                               .replace('\\\\', '\\'))
 
