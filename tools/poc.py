@@ -6,6 +6,7 @@ import glob
 import os
 import re
 from datetime import datetime
+import unicodedata as ud
 
 from dateutil.tz import tzlocal
 from pfm.fileobj.mdfile import MdFile
@@ -65,7 +66,7 @@ class PoCompiler:
         self.poparser = PoParser()
         self.crpt = r'^# This file is distributed under the same license as ' \
                     r'the [a-zA-Z0-9\-\.\_]+ package\.\n?$'
-        self.creditpt = '^#\s([A-Z][a-z\W]+)([\-\s][A-Z][a-z\W]+)+' \
+        self.creditpt = '^#\s([\wA-Z][\wa-z\W]+)([\-\s][\wA-Z][\wa-z\W]+)+' \
                         '\s\<[a-zA-Z0-9\.\-_]+\@'\
                         '[a-zA-Z0-9\-_]+(\.[a-zA-Z0-9\-_]+)+\>' \
                         '(,\s([1-2][0-9]{3})(\-([1-2][0-9]{3}))?)+\.\n?$'
@@ -89,7 +90,9 @@ class PoCompiler:
         exist_credit = False
 
         while 1:
-            poline = self.f.readline()[:-1]
+            # How to include names with strange characters
+            # https://stackoverflow.com/questions/18663644/how-to-account-for-accent-characters-for-regex-in-python
+            poline = ud.normalize('NFC', self.f.readline()[:-1])
             pt = self.poparser.parse(poline)
 
             # end of verification
