@@ -129,9 +129,9 @@ class PoTemplate:
         del tmdp_list
 
     def export(self):
-        fpath = '{}/{}/{}.pot'.format(os.getcwd(), 'po', self.filename)
+        fpath = os.path.join(os.getcwd(), 'po', self.filename + '.pot')
         print('Creating {} ... '.format(
-            fpath.replace(os.getcwd() + '/', '')), end='')
+            fpath.replace(os.getcwd() + os.sep, '')), end='')
         self.fo = open(fpath, 'w')
 
         self.prepare_header()

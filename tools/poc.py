@@ -52,8 +52,8 @@ class LangTeamMissingException(Exception):
 
 class PoCompiler:
     def __init__(self):
-        self.sourcedir = '{}/po'.format(os.getcwd())
-        self.outputdir = '{}/locale'.format(os.getcwd())
+        self.sourcedir = os.path.join(os.getcwd(), 'po')
+        self.outputdir = os.path.join(os.getcwd(), 'locale')
         self.outfile = None
 
         self.last_trans_name = []
@@ -239,14 +239,14 @@ class PoCompiler:
         mdlist = self.pofile.msg_object()
         for mdfn in sorted(mdlist.keys()):
             mdfo = mdlist.get(mdfn)
-            tpath = '{}/{}/{}'.format(self.outputdir, self.clocale,
-                                      mdfn.split('/')[0])
+            tpath = os.path.join(self.outputdir, self.clocale,
+                                      mdfn.split(os.sep)[0])
             if not os.path.exists(tpath) and '/' in mdfn:
                 os.makedirs(tpath, 0o755)
 
             # writeout to md
-            self.outfile = open(
-                '{}/{}/{}'.format(self.outputdir, self.clocale, mdfn), 'w')
+            self.outfile = open(os.path.join(
+                self.outputdir, self.clocale, mdfn), 'w')
             print('Writing {} ... '.format(self.outfile.name), end='')
 
             # cln : current line number
@@ -290,11 +290,11 @@ class PoCompiler:
             print('OK')
 
     def run(self):
-        cll = open('{}/LINGUAS'.format(self.sourcedir), 'r').readline()
+        cll = open(os.path.join(self.sourcedir, 'LINGUAS'), 'r').readline()
         self.langlist = cll[:-1].split(' ')
 
         for lang in self.langlist:
-            polist = glob.glob('{}/*.{}.po'.format(self.sourcedir, lang))
+            polist = glob.glob(os.path.join(self.sourcedir, '*.{}.po'.format(lang)))
             if len(polist) != 0:
                 print('Compiling *.{}.po ...'.format(lang))
             self.clocale = lang
