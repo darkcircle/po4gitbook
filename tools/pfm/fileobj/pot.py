@@ -183,6 +183,8 @@ class PoTemplate:
                 elif pobj.is_rule():
                     self.fo.write(
                         '# horizontal rule. just copy and paste from the msgid')
+                elif pobj.is_swclabel():
+                    self.fo.write('# SC/DC Template label\n')
 
                 # message id
                 self.fo.write('msgid "')

@@ -66,5 +66,8 @@ class MdPara:
     def is_rule(self):
         return self.check_type('hr')
 
+    def is_swclabel(self):
+        return self.check_type('swclabel')
+
     def is_blank(self):
         return self.check_type('blank')

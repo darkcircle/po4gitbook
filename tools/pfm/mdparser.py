@@ -19,10 +19,14 @@ class MdParser:
         self.blc = re.compile(r'^\s*\n$')
         self.wtoc = re.compile(r'^\{\|(\s[a-z]+\=\"[0-9A-Za-z]+\")+\n$')
         self.wtcc = re.compile(r'^\|\}\n$')
+        self.swclabel = re.compile(r'[\>]*[\s]*\{:\s\.[\w]+\}\n$')
 
     def parse(self, mstr):
         if self.yaml.match(mstr):
             return 'yamlblock'
+
+        elif self.swclabel.match(mstr):
+            return 'swclabel'
 
         elif self.bqc.match(mstr):
             return 'blockquote'
