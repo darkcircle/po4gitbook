@@ -13,13 +13,12 @@ class MdParser:
         self.ulc = re.compile(r"^([\s]*[\*\+\-]\s)[\S\s]+$")
         self.olc = re.compile(r'^[1-9][0-9]*\.\s[\S\s]+$')
         self.hrc = re.compile(r'^([\*\-_]+|([\*\-_]\s){3,})$')
-        self.cbc = re.compile(r'^([\s]*```)[\s\S]+$')
+        self.cbc = re.compile(r'^([\s]*```)[\s\S]+$|^(~){3}')
         self.toc = re.compile(r'^<[\w]+>\n$')
         self.tcc = re.compile(r'^</[\w]+>\n$')
         self.blc = re.compile(r'^\s*\n$')
         self.wtoc = re.compile(r'^\{\|(\s[a-z]+\=\"[0-9A-Za-z]+\")+\n$')
         self.wtcc = re.compile(r'^\|\}\n$')
-
 
     def parse(self, mstr):
         if self.yaml.match(mstr):
