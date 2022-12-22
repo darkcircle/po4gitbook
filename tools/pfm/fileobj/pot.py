@@ -129,9 +129,9 @@ class PoTemplate:
         del tmdp_list
 
     def export(self):
-        fpath = '{}/{}/{}.pot'.format(os.getcwd(), 'po', self.filename)
+        fpath = os.path.join(os.getcwd(), 'po', self.filename + '.pot')
         print('Creating {} ... '.format(
-            fpath.replace(os.getcwd() + '/', '')), end='')
+            fpath.replace(os.getcwd() + os.sep, '')), end='')
         self.fo = open(fpath, 'w')
 
         self.prepare_header()
@@ -171,6 +171,9 @@ class PoTemplate:
                 elif pobj.is_codeblock():
                     self.fo.write('# code block\n')
 
+                elif pobj.is_yamlblock():
+                    self.fo.write('# Front Matter\n')
+
                 elif pobj.is_tagopen():
                     self.fo.write('# inline html\n')
 
@@ -180,6 +183,8 @@ class PoTemplate:
                 elif pobj.is_rule():
                     self.fo.write(
                         '# horizontal rule. just copy and paste from the msgid')
+                elif pobj.is_swclabel():
+                    self.fo.write('# SC/DC Template label\n')
 
                 # message id
                 self.fo.write('msgid "')

@@ -5,6 +5,7 @@ import re
 
 class MdParser:
     def __init__(self):
+        self.yaml = re.compile(r'(-){3}')
         self.hc = re.compile(r'(^[\s\S]+\n(-[-]+|=[=]+)|' +
                              r'^([#]{1,6})\s[\s\S]+(\s\3)?)')
         self.hlc = re.compile(r'^(-[-]+|=[=]+)\n?$')
@@ -12,16 +13,22 @@ class MdParser:
         self.ulc = re.compile(r"^([\s]*[\*\+\-]\s)[\S\s]+$")
         self.olc = re.compile(r'^[1-9][0-9]*\.\s[\S\s]+$')
         self.hrc = re.compile(r'^([\*\-_]+|([\*\-_]\s){3,})$')
-        self.cbc = re.compile(r'^([\s]*```)[\s\S]+$')
+        self.cbc = re.compile(r'^([\s]*```)[\s\S]+$|^(~){3}')
         self.toc = re.compile(r'^<[\w]+>\n$')
         self.tcc = re.compile(r'^</[\w]+>\n$')
         self.blc = re.compile(r'^\s*\n$')
         self.wtoc = re.compile(r'^\{\|(\s[a-z]+\=\"[0-9A-Za-z]+\")+\n$')
         self.wtcc = re.compile(r'^\|\}\n$')
-
+        self.swclabel = re.compile(r'[\>]*[\s]*\{:\s\.[\w]+\}\n$')
 
     def parse(self, mstr):
-        if self.bqc.match(mstr):
+        if self.yaml.match(mstr):
+            return 'yamlblock'
+
+        elif self.swclabel.match(mstr):
+            return 'swclabel'
+
+        elif self.bqc.match(mstr):
             return 'blockquote'
 
         elif self.ulc.match(mstr):

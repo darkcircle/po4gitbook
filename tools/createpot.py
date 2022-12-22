@@ -19,8 +19,8 @@ class PFMMain:
 
         self.filelist = []
 
-        self.cwd = '{}/'.format(os.getcwd())
-        self.potpath = '{}po'.format(self.cwd)
+        self.cwd = os.getcwd()
+        self.potpath = os.path.join(self.cwd, 'po')
         self.potobj = None
 
         self.mdparser = MdParser()
@@ -31,36 +31,38 @@ class PFMMain:
             os.makedirs(self.potpath)
 
         # open POTFILES.in
-        outfile = open('{}/{}'.format(self.potpath, self.conf), 'w')
+        outfile = open(os.path.join(self.potpath, self.conf), 'w')
 
         print('Scanning markdown files ...')
         time.sleep(1)
 
         # list all md files on the document root
-        files = glob.glob(os.getcwd() + '/*.md')
+        files = glob.glob(os.path.join(self.cwd, '*.md'))
         files.sort()
 
         for file in files:
-            print('{} is found'.format(file.replace(self.cwd, '')))
-            outfile.write(file.replace(self.cwd, '') + '\n')
+            file = file.replace(self.cwd + os.sep, '')
+            print('{} is found'.format(file))
+            outfile.write(file + '\n')
 
-        dirs = os.listdir(os.getcwd())
+        dirs = os.listdir(self.cwd)
         dirs.sort()
 
         for dirn in dirs:
             if os.path.isdir(dirn):
-                mdfiles = glob.glob('{}{}/*.md'.format(self.cwd, dirn))
+                mdfiles = glob.glob(os.path.join(self.cwd, dirn, '*.md'))
                 mdfiles.sort()
 
                 for mdfile in mdfiles:
-                    print('{} is found'.format(mdfile.replace(self.cwd, '')))
-                    outfile.write(mdfile.replace(self.cwd, '') + '\n')
+                    mdfile = mdfile.replace(self.cwd + os.sep, '')
+                    print('{} is found'.format(mdfile))
+                    outfile.write(mdfile + '\n')
 
         print('File list is saved to po/POTFILES.in\n')
         outfile.close()
 
     def parse_md(self, filename):
-        mdfile = open('{}/{}'.format(os.getcwd(), filename), 'r')
+        mdfile = open(os.path.join(os.getcwd(), filename), 'r')
         mdobj = MdFile(filename)
 
         print('Extracting messages from {} ... '.format(filename))
@@ -76,12 +78,39 @@ class PFMMain:
 
             # print('%d: %s' % (line, mdstr), end="", flush=True)
             mdptype = self.mdparser.parse(mdstr)
-            if mdptype == 'blank':
-                continue
 
             mdp = MdPara()
             mdp.set_type(mdptype, mdstr)
             cline = line
+
+            # paragraph of text that's broken into multiple lines
+            if mdp.is_common():
+                while 1:
+                    mdstr = mdfile.readline()
+                    line += 1
+                    if not mdstr or self.mdparser.parse(mdstr) == 'blank':
+                        break
+                    if self.mdparser.parse(mdstr) == 'swclabel':
+                        line -= 1
+                        mdfile.seek(mdpos)
+                        break
+
+                    # print('%d: %s' % (line, mdstr), end="", flush=True)
+                    mdp.set_type(mdp.para_type(), mdp.para_msg() + mdstr)
+                    mdpos = mdfile.tell()
+
+            # if Front matter yaml section starts # TODO join with codeblock?
+            if mdp.is_yamlblock():
+                while 1:
+                    mdstr = mdfile.readline()
+                    line += 1
+                    if not mdstr:
+                        break
+                    # print('%d: %s' % (line, mdstr), end="", flush=True)
+                    mdp.set_type(mdp.para_type(), mdp.para_msg() + mdstr)
+
+                    if self.mdparser.parse(mdstr) == 'yamlblock':
+                        break
 
             # if paragraph is common and is expectable to be a header
             # by looking forward the next line
@@ -162,7 +191,7 @@ class PFMMain:
         # init pot
         self.potobj = PoTemplate()
         self.potobj.set_filename(dstr)
-        self.potobj.set_project_title(os.getcwd().split('/')[-1])
+        self.potobj.set_project_title(os.path.split(self.cwd)[-1])
         self.potobj.set_report_bug(
             'https://github.com/haiwen/seafile-docs/issues')
 
@@ -171,7 +200,7 @@ class PFMMain:
         self.scan_md()
 
         # open POTFILES.in
-        dfl = open('{}/{}'.format(self.potpath, self.conf), 'r')
+        dfl = open(os.path.join(self.potpath, self.conf), 'r')
         dname = ''
 
         while 1:
@@ -182,7 +211,7 @@ class PFMMain:
 
             # create pot file per directory
             filename = filename[:-1]
-            dstr = '/' in filename and filename.split('/')[0] or 'doc-root'
+            dstr = os.sep in filename and filename.split(os.sep)[0] or 'doc-root'
 
             # if directory has changed
             if dname != dstr:

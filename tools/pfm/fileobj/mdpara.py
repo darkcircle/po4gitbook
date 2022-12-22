@@ -27,6 +27,9 @@ class MdPara:
     def para_msg(self):
         return self.paramsg
 
+    def is_yamlblock(self):
+        return self.check_type('yamlblock')
+
     def is_header(self):
         return self.check_type('header')
 
@@ -62,6 +65,9 @@ class MdPara:
 
     def is_rule(self):
         return self.check_type('hr')
+
+    def is_swclabel(self):
+        return self.check_type('swclabel')
 
     def is_blank(self):
         return self.check_type('blank')
